@@ -5,63 +5,29 @@ import {ref} from "vue";
 import axios from "axios"
 
 let myCards = ref<number[]>([])
-let pureCards = ref<number[]>([])
-let pureWithCardsCards = ref<number[]>([])
 let setCards = ref<number[]>([])
 let setWithJokerCards = ref<number[]>([])
-let invalidCards = ref<number[]>([])
 let sysJoker = ref<number[]>([])
 let joker = ref<number[]>([])
+
+let reqId = ref<number>(0)
+
+let promptCards = ref<number[][]>([])
 
 let cardsNumber = ref<number>(0)
 
 const todoReq = async () => {
-  await axios.get("http://192.168.2.173:8080").then(response => {
-    myCards.value = response.data.myCards ?? []
-    pureCards.value = response.data.pure ?? []
-    pureWithCardsCards.value = response.data.pureWithJoker ?? []
-    setCards.value = response.data.set ?? []
-    setWithJokerCards.value = response.data.setWithJoker ?? []
-    invalidCards.value = response.data.invalid ?? []
-    sysJoker.value = response.data.sysJoker ?? []
-    joker.value = response.data.joker ?? []
+  await axios.get("http://192.168.2.173:8009/api/v1/hand/range").then(response => {
+    promptCards.value = response.data.data.result
+
+    myCards.value = response.data.data.myCards
+    reqId.value += 1
+
+    sysJoker.value = response.data.data.sysJoker ?? []
 
     cardsNumber.value = 0
-
-    pureCards.value.forEach((i) => {
-      if (i != 0) {
-        cardsNumber.value += 1
-      }
-    })
-
-    pureWithCardsCards.value.forEach((i) => {
-      if (i != 0) {
-        cardsNumber.value += 1
-      }
-    })
-
-    setCards.value.forEach((i) => {
-      if (i != 0) {
-        cardsNumber.value += 1
-      }
-    })
-
-    setWithJokerCards.value.forEach((i) => {
-      if (i != 0) {
-        cardsNumber.value += 1
-      }
-    })
-
-    invalidCards.value.forEach((i) => {
-      if (i != 0) {
-        cardsNumber.value += 1
-      }
-    })
-
-    joker.value.forEach((i) => {
-      if (i != 0) {
-        cardsNumber.value += 1
-      }
+    promptCards.value.forEach((i) => {
+      cardsNumber.value += i.length
     })
 
   })
@@ -74,30 +40,22 @@ const todoReq = async () => {
      <div class="cards">
        <div class="my-card">
          <h3>当前手牌</h3>
-         <Card :cards="myCards"></Card>
+         <Card :cards="myCards" :key="reqId"></Card>
        </div>
 
        <div class="my-card">
-         <h3>无效牌</h3>
-         <Card :cards="invalidCards"></Card>
-       </div>
-
-       <div class="my-card">
-         <h3>纯顺子</h3>
-         <Card :cards="pureCards"></Card>
-       </div>
-
-       <div class="my-card">
-         <h3>带Joker的顺子</h3>
-         <Card :cards="pureWithCardsCards"></Card>
+         <h3>计算后的牌</h3>
+         <div class="prompt-cards">
+           <div v-for="(c, i) in promptCards" :key="reqId">
+             <Card :cards="c"></Card>
+           </div>
+         </div>
        </div>
 
        <div class="my-card">
          <h3>返回牌的数量是</h3>
          <p class="my-cards-num">{{ cardsNumber }}</p>
        </div>
-
-
      </div>
 
     <div class="cards-2">
@@ -118,7 +76,9 @@ const todoReq = async () => {
 
       <div class="my-card">
         <h3>当前系统的Joker</h3>
-        <Card :cards="sysJoker"></Card>
+        <div v-for="(c, i) in sysJoker" :key="reqId">
+          <Card :cards="c"></Card>
+        </div>
       </div>
     </div>
 
@@ -153,5 +113,10 @@ const todoReq = async () => {
 .my-cards-num {
   font-size: 24px;
   font-weight: bold;
+}
+
+.prompt-cards {
+  display: flex;
+  gap: 30px;
 }
 </style>

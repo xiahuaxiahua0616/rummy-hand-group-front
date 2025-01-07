@@ -6,22 +6,15 @@ const props = defineProps(['cards'])
 
 const cardsImg = ref<string[]>([]);
 
-watch(props, () => {
-  cardsImg.value = []
+cardsImg.value = []
 
-  props.cards.forEach((v: number) => {
-    const suit = Math.ceil(v / 16); // 花色计算
+props.cards.forEach((v: number) => {
+  const suit = Math.ceil(v / 16); // 花色计算
 
-    const rank = v % 16; // 点数计算
-    if (rank != 0) {
-      cardsImg.value.push(`src/assets/cards/card_${suit-1}${rank.toString(16)}.png`);
-    }
-    // if (rank == 0) {
-    //   // cardsImg.value.push(`src/assets/cards/card_back.png`);
-    // } else {
-    //   cardsImg.value.push(`src/assets/cards/card_${suit-1}${rank.toString(16)}.png`);
-    // }
-  })
+  const rank = v % 16; // 点数计算
+  if (rank != 0) {
+    cardsImg.value.push(`src/assets/cards/card_${suit-1}${rank.toString(16)}.png`);
+  }
 })
 
 </script>
